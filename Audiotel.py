@@ -34,8 +34,10 @@ class Room:
     self.paths = {}
 
   def play(self):
-    esc_desc = shellquote(self.description)
-    os.system("say -v "+self.voice+" "+esc_desc)
+    for d,c in self.description:
+      if c :
+        esc_desc = shellquote(d)
+        os.system("say -v "+self.voice+" "+esc_desc)
 
   def go(self, direction):
     return self.paths.get(direction, None)
@@ -54,6 +56,17 @@ class Room:
       else:
         room.play()
     return choices
+
+class Game(object):
+  def __init__(self, name):
+    self.name = name
+    self.rooms = {}
+
+  def add_rooms(self, rooms):
+    self.rooms.update(rooms)
+
+  def add_room(self, key, room):
+    self.rooms[key] = room;
 
 class Action:
   def alter_room(self,target, replacement):
