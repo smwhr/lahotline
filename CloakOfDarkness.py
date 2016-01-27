@@ -66,7 +66,12 @@ def error(msg):
   sys.exit(1)
 
 if __name__ == "__main__":
-  q = Queue()
+  try:
+    import RPi.GPIO as GPIO
+    q = None
+  except ImportError:
+    q = Queue()
+  
 
   try:
     phone = S63(queue=q)
@@ -78,14 +83,16 @@ if __name__ == "__main__":
     game = CloakOfDarkness(player = p)
     phone.setCallback(game.update)
     if(sys.platform == 'darwin'):
-      game.preload()
+      #game.preload()
+      pass
     game.start()
 
     while True:
-      line = input('mygame> ')
-      if line == 'quit':
-        break
-      q.put(line.split(","))
+      if q is not None:
+        line = input('mygame> ')
+        if line == 'quit':
+          break
+        q.put(line.split(","))
       sleep(.1)
 
   except:
