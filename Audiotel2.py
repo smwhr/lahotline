@@ -39,6 +39,13 @@ class Game(object):
         if type(description) == tuple:
           description, cond = description
         self.player.preload(description)
+      for action_code in room.actions:
+        action = room.actions[action_code]
+        try:
+          description = action.description
+          self.player.preload(description)
+        except AttributeError:
+          continue
 
   def r(self, rooms):
     self.add_rooms(rooms)

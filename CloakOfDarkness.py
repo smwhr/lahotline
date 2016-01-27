@@ -10,14 +10,8 @@ from Player import Player
 from Action import Goto, ChangeVar, Lambda, Describe, Group
 from Element import Room
 
-def error(msg):
-  print(msg)
-  sys.exit(1)
 
-q = Queue()
-
-
-class TestGame(Game):
+class CloakOfDarkness(Game):
   def setup(g):
 
     g.s('wear_coat', True)
@@ -67,32 +61,38 @@ class TestGame(Game):
 
     g.set_current_room(foyer)
 
+def error(msg):
+  print(msg)
+  sys.exit(1)
 
-try:
-  phone = S63(queue=q)
-  phone.start()
-  phone.setErrorCallback(error)
+if __name__ == "__main__":
+  q = Queue()
 
-  p = Player()
+  try:
+    phone = S63(queue=q)
+    phone.start()
+    phone.setErrorCallback(error)
 
-  game = TestGame(player = p)
-  phone.setCallback(game.update)
-  if(sys.platform == 'darwin'):
-    game.preload()
-  game.start()
+    p = Player()
 
-  while True:
-    line = input('mygame> ')
-    if line == 'quit':
-      break
-    q.put(line.split(","))
-    sleep(.1)
+    game = CloakOfDarkness(player = p)
+    phone.setCallback(game.update)
+    if(sys.platform == 'darwin'):
+      game.preload()
+    game.start()
 
-except:
-  raise
-finally:
-  phone.clean()
-  e = sys.exc_info()
-  if(e[0] is not None):
+    while True:
+      line = input('mygame> ')
+      if line == 'quit':
+        break
+      q.put(line.split(","))
+      sleep(.1)
+
+  except:
     raise
-  sys.exit()
+  finally:
+    phone.clean()
+    e = sys.exc_info()
+    if(e[0] is not None):
+      raise
+    sys.exit()
