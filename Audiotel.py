@@ -1,9 +1,35 @@
 # -*- coding: utf-8 -*-
 #OSX Installed : Thomas (fr), Amelie (fr), Karen (en), Alex (en)
 import os
+from queue import Queue
 
-def shellquote(s):
-    return "'" + s.replace("'", "'\\''") + "'"
+class Game(object):
+  def __init__(self, name,initial = {}):
+    self.name = name
+    self.rooms = {}
+    self.actions = {}
+    self.state = GameState(initial)
+    self.current_room = None
+    self.player = None
+    self.actions
+
+  def add_room(self, key, room):
+    self.rooms[key] = room;
+
+  def add_action(self, key, action):
+    self.actions[key] = action;
+
+  def get_current(self):
+    return self.rooms[self.current_room]
+
+  def play_current(self):
+    self.get_current().play()
+
+  def input(self, in):
+
+
+  def loop():
+    while True:
 
 class GameState:
   def __init__(self, initial = {}):
@@ -27,17 +53,22 @@ class GameState:
     return state
 
 class Room:
-
-  def __init__(self, voice, description):
+  def __init__(self, lines, options):
     self.voice = voice
-    self.description = description
+    self.lines = lines
+    self.options = options
     self.paths = {}
 
   def play(self):
-    for d,c in self.description:
-      if c :
-        esc_desc = shellquote(d)
-        os.system("say -v "+self.voice+" "+esc_desc)
+    to_play = []
+    for d,cond in self.lines:
+      say_d = True
+      if callable(cond):
+        say_d = cond()
+      else :
+        say_d = cond
+      if say_d :
+        to_play.append(d)
 
   def go(self, direction):
     return self.paths.get(direction, None)
@@ -45,31 +76,29 @@ class Room:
   def add_paths(self, paths):
     self.paths.update(paths)
 
-  def callback_go(self,phone_callback):
-    room = self
-    def choices(d):
-      print "Vous avez choisi", d
-      dest = room.go(d)
-      if(dest is not None):
-        phone_callback(dest.callback_go(phone_callback))
-        dest.play()
-      else:
-        room.play()
-    return choices
+  def get_paths(self):
+    available = []
+    for d,cond in self.lines:
+      can_d = True
+      if callable(cond):
+        can_d = cond()
+      else :
+        can_d = cond
+      if can_d :
+        available.append(d)
 
-class Game(object):
-  def __init__(self, name):
-    self.name = name
-    self.rooms = {}
-
-  def add_rooms(self, rooms):
-    self.rooms.update(rooms)
-
-  def add_room(self, key, room):
-    self.rooms[key] = room;
 
 class Action:
-  def alter_room(self,target, replacement):
-    target.voice = replacement.voice
-    target.description = replacement.description
-    target.add_paths(replacement.paths)
+  def __init__(self, voice, description, *args, **kwargs):
+    arglist = list(args)
+    self.action = arglist.pop(0)
+    self.voice = voice
+    self.description = description
+    self.args = tuple(arglist)
+    self.kwargs = kwargs
+
+  def do(self):
+    return self.action(*self.args, **self.kwargs)
+
+  def play(self):
+    

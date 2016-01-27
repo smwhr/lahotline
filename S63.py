@@ -4,6 +4,7 @@ import threading
 from threading import Thread
 import random
 import sys
+import queue
 
 class S63:
   def __init__(self,callback = None, error_callback = None, queue = None):
@@ -12,10 +13,10 @@ class S63:
     
     if(callback is None):
       def callback(d):
-        print d
+        print(d)
     if(error_callback is None):
       def error_callback(msg):
-        print msg
+        print(msg)
     
     self.io = S63IO(self.running, callback=callback, error_callback=error_callback, queue=self.queue)
 
@@ -99,7 +100,7 @@ class S63IO(Thread):
         GPIO.setup(10, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         GPIO.add_event_detect(10, GPIO.FALLING, callback=self.compose_column, bouncetime=100)
       else:
-        print "Dummy GPIOs"
+        print("Dummy GPIOs")
     except Exception:
       self.error_callback("Could not setup GPIO")
       self.clean()
@@ -107,7 +108,7 @@ class S63IO(Thread):
 
 
   def clean(self):
-    print "GPIO.cleanup()"
+    print("GPIO.cleanup()")
     if self.isRaspi:
       GPIO.cleanup()
 
@@ -133,7 +134,7 @@ class S63IO(Thread):
 
   def collect(self,line = None, column = None):
     now = time.time()
-    #print now - last_collect
+    #print(now - last_collect)
     if now - self.last_collect > 0.005:
       self.collector = [None, None]
       if(line is not None):
@@ -141,17 +142,17 @@ class S63IO(Thread):
     if(column is not None):
       self.collector[1] = column
     if(self.collector[0] != None and self.collector[1] != None):
-      #print collector
+      #print(collector)
       self.composed(self.collector)
       self.collector = [None, None]
     self.last_collect = now
 
   def composed(self,tap):
     now = time.time()
-    if now - self.last_compose < 0.1: #debounce at 100ms
+    if now - self.last_compose < 0.100: #debounce at 100ms
       return
     digit = S63Config.touches[tap[0]][tap[1]]
-    print digit
+    print(digit)
     self.event_callback(digit)
     self.last_compose = now
 
@@ -165,8 +166,10 @@ class S63IO(Thread):
           self.compose_column(int(c))
           sleep(0.006) #so that there's no conflict with regular input
           continue
-      except:
+      except queue.Empty:
         continue
+      except Exception as e:
+        self.error_callback(e)
       sleep(.1)
-    print "S63 Subroutine ended by clearing runningEvent"
+    print("S63 Subroutine ended by clearing runningEvent")
     self.clean()
