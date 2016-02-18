@@ -110,6 +110,7 @@ class S63IO(Thread):
   def clean(self):
     print("GPIO.cleanup()")
     if self.isRaspi:
+      import RPi.GPIO as GPIO
       GPIO.cleanup()
 
   def setCallback(self,callback):
@@ -120,6 +121,7 @@ class S63IO(Thread):
 
   def phone_hook(self,channel):
     if self.isRaspi:
+      import RPi.GPIO as GPIO
       state = GPIO.input(channel)
     else:
       state = self.hook_state

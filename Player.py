@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import pygame
 import sys
 import hashlib
@@ -16,21 +17,21 @@ class Player:
 
 
   def say(self, text, voice="Thomas"):
-    soundfile = "assets/"+hashlib.md5(text.encode('utf-8')).hexdigest()+".wav"
-    print(text)
+    filename = "assets/"+hashlib.md5(text.encode('utf-8')).hexdigest()
+    #print(text)
     if(sys.platform == 'darwin'):
       esc_desc = shellquote(text)
       os.system("say -v "+voice+" "+esc_desc)
-      return
+      #os.system("say -v "+voice+ " -o "+soundfile+" --data-format=LEF32@22050 "+esc_desc+" && ffmpeg -i "+soundfile+"  -acodec libvorbis "+oggfile+"")
     else:
-      sound= pygame.mixer.Sound(soundfile)
+      sound= pygame.mixer.Sound(filename+".ogg")
       sound.play()
 
   def preload(self, text, voice="Thomas"):
-    soundfile = "assets/"+hashlib.md5(text.encode('utf-8')).hexdigest()+".wav"
+    filename = "assets/"+hashlib.md5(text.encode('utf-8')).hexdigest()
     if(sys.platform == 'darwin'):
       esc_desc = shellquote(text)
-      os.system("say -v "+voice+ " -o "+soundfile+" --data-format=LEF32@8000 "+esc_desc)
+      os.system("say -v "+voice+ " -o "+filename+".wav --data-format=LEF32@22050 "+esc_desc+" && ffmpeg -i "+filename+".wav  -acodec libvorbis "+filename+".ogg")
 
 
     

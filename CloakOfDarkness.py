@@ -83,8 +83,8 @@ if __name__ == "__main__":
     game = CloakOfDarkness(player = p)
     phone.setCallback(game.update)
     if(sys.platform == 'darwin'):
-      #game.preload()
-      pass
+      game.preload()
+      #pass
     game.start()
 
     while True:
